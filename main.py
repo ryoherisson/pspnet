@@ -9,6 +9,7 @@ from torchsummary import summary
 
 from utils.path_process import Paths
 from utils.setup_logger import setup_logger
+from data_process.data_path_process import make_datapath_list
 
 logger = getLogger(__name__)
 
@@ -44,6 +45,11 @@ def main(args):
 
     ### Dataset ###
     logger.info('preparing dataset...')
+    data_root = configs['data_root']
+    logger.info(f'==> dataset path: {data_root}\n')
+
+    train_img_list, train_annot_list, test_img_list, test_annot_list = make_datapath_list(rootpath=data_root, train_data=configs['train_txt'], test_data=configs['test_txt'])
+    
 
     ### DataLoader ###
 
@@ -54,7 +60,7 @@ def main(args):
     ### Visualize Results ###
 
     ### Train or Inference ###
-    
+
 
 if __name__ == "__main__":
     args = parser()
