@@ -1,0 +1,48 @@
+# ----------
+# dataset
+# ----------
+data_root: ./dataset/
+n_classes: 21
+classes: ['aeroplane', 'bicycle', 'bird', 'boat',
+            'bottle', 'bus', 'car', 'cat', 'chair',
+            'cow', 'diningtable', 'dog', 'horse',
+            'motorbike', 'person', 'pottedplant',
+            'sheep', 'sofa', 'train', 'tvmonitor']
+img_size: 300
+n_channels: 3
+color_mean: [104, 117, 123]
+train_txt: train.txt
+test_txt: val.txt
+
+# ----------------
+# train parameters
+# ----------------
+lr: 0.0001
+decay: 0.0001
+n_gpus: 1 # currently works with only one gpu
+batch_size: 64
+n_epochs: 50
+
+# pretrained path: vgg16 model path or blank
+pretrained: ./weights/vgg16_reducedfc.pth
+
+# save_ckpt_interval should not be 0.
+save_ckpt_interval: 50
+
+# output dir (logs, results)
+log_dir: ./logs/
+
+# checkpoint path or blank
+resume: ./weights/ssd300_mAP_77.43_v2.pth
+# e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_acc_ckpt.pth
+
+
+# ----------------
+# Visualize Results
+# ----------------
+# visualize label color_map
+label_color_map: ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231', '#911eb4', '#46f0f0', '#f032e6',
+                  '#d2f53c', '#fabebe', '#008080', '#000080', '#aa6e28', '#fffac8', '#800000', '#aaffc3', '#808000',
+                  '#ffd8b1', '#e6beff', '#808080', '#FFFFFF']
+# font should be downloaded manually
+font_path: ./font/calibril.ttf
