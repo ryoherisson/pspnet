@@ -1,8 +1,13 @@
 import argparse
 import yaml
 from pathlib import Path
+from datetime import datetime
 
 from logging import getLogger
+
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
 
 from tensorboardX import SummaryWriter
 from torchsummary import summary
@@ -10,6 +15,7 @@ from torchsummary import summary
 from utils.path_process import Paths
 from utils.setup_logger import setup_logger
 from data_process.data_path_process import make_datapath_list
+from data_process.dataloader import DataTransform, VOCDataset
 
 logger = getLogger(__name__)
 
@@ -49,10 +55,27 @@ def main(args):
     logger.info(f'==> dataset path: {data_root}\n')
 
     train_img_list, train_annot_list, test_img_list, test_annot_list = make_datapath_list(rootpath=data_root, train_data=configs['train_txt'], test_data=configs['test_txt'])
-    
+    print(len(train_img_list))
+    print(len(train_annot_list))
+    train_transform = DataTransform(input_size=configs['input_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='train')
+    test_transform = DataTransform(input_size=configs['input_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='test')
+
+    train_dataset = VOCDataset(train_img_list, train_annot_list, transform=train_transform, label_color_map=configs['label_color_map'])
+    test_dataset = VOCDataset(test_img_list, test_annot_list, transform=test_transform, label_color_map=configs['label_color_map'])
 
     ### DataLoader ###
+    train_loader = DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=configs['batch_size'], shuffle=False)
 
+    for inputs, targets, img_paths in train_loader:
+        print(inputs.size())
+        print(targets.size())
+        print(img_paths)
+
+    for inputs, targets, img_paths in test_loader:
+        print(inputs.size())
+        print(targets.size())
+        print(img_paths)
 
     ### Network ###
     logger.info('preparing network...')
