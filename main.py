@@ -15,6 +15,7 @@ from torchsummary import summary
 
 from utils.path_process import Paths
 from utils.setup_logger import setup_logger
+from utils.vis_img import VisImage
 from data_process.data_path_process import make_datapath_list
 from data_process.dataloader import DataTransform, VOCDataset
 from modeling.pspnet.pspnet import PSPNet
@@ -112,9 +113,10 @@ def main(args):
     metrics = Metrics(**metrics_cfg)
 
     ### Visualize Results ###
+    vis_img = VisImage(n_classes=configs['n_classes'], label_color_map=configs['label_color_map'])
 
     ### Train or Inference ###
-
+    
 
 if __name__ == "__main__":
     args = parser()
