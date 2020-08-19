@@ -17,6 +17,7 @@ from utils.setup_logger import setup_logger
 from data_process.data_path_process import make_datapath_list
 from data_process.dataloader import DataTransform, VOCDataset
 from modeling.pspnet.pspnet import PSPNet
+from modeling.criterion.psploss import PSPLoss
 
 logger = getLogger(__name__)
 
@@ -56,8 +57,7 @@ def main(args):
     logger.info(f'==> dataset path: {data_root}\n')
 
     train_img_list, train_annot_list, test_img_list, test_annot_list = make_datapath_list(rootpath=data_root, train_data=configs['train_txt'], test_data=configs['test_txt'])
-    print(len(train_img_list))
-    print(len(train_annot_list))
+    
     train_transform = DataTransform(input_size=configs['input_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='train')
     test_transform = DataTransform(input_size=configs['input_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='test')
 
