@@ -8,7 +8,7 @@ classes: ['aeroplane', 'bicycle', 'bird', 'boat',
             'cow', 'diningtable', 'dog', 'horse',
             'motorbike', 'person', 'pottedplant',
             'sheep', 'sofa', 'train', 'tvmonitor']
-input_size: 300
+input_size: 475
 n_channels: 3
 color_mean: [0.485, 0.456, 0.406]
 color_std: [0.229, 0.224, 0.225]
@@ -23,6 +23,7 @@ decay: 0.0001
 n_gpus: 1 # currently works with only one gpu
 batch_size: 64
 n_epochs: 50
+input_size_8: 60
 
 # pretrained path: vgg16 model path or blank
 pretrained: ./weights/vgg16_reducedfc.pth
