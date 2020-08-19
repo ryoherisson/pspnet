@@ -16,6 +16,7 @@ from utils.path_process import Paths
 from utils.setup_logger import setup_logger
 from data_process.data_path_process import make_datapath_list
 from data_process.dataloader import DataTransform, VOCDataset
+from modeling.pspnet.pspnet import PSPNet
 
 logger = getLogger(__name__)
 
@@ -67,18 +68,14 @@ def main(args):
     train_loader = DataLoader(train_dataset, batch_size=configs['batch_size'], shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=configs['batch_size'], shuffle=False)
 
-    for inputs, targets, img_paths in train_loader:
-        print(inputs.size())
-        print(targets.size())
-        print(img_paths)
-
-    for inputs, targets, img_paths in test_loader:
-        print(inputs.size())
-        print(targets.size())
-        print(img_paths)
-
     ### Network ###
     logger.info('preparing network...')
+
+    network = PSPNet(n_classes=configs['n_classes'], img_size=configs['input_size'], img_size_8=configs['input_size_8'])
+    network = network.to(device)
+
+    logger.info('model summary: ')
+    summary(network, input_size=(configs['n_channels'], configs['input_size'], configs['input_size']))
 
     ### Visualize Results ###
 
