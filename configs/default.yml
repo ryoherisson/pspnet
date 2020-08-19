@@ -26,9 +26,6 @@ n_epochs: 50
 input_size_8: 60
 aux_weight: 0.4
 
-# pretrained path: vgg16 model path or blank
-pretrained: ./weights/vgg16_reducedfc.pth
-
 # save_ckpt_interval should not be 0.
 save_ckpt_interval: 50
 
@@ -36,7 +33,7 @@ save_ckpt_interval: 50
 log_dir: ./logs/
 
 # checkpoint path or blank
-resume: ./weights/ssd300_mAP_77.43_v2.pth
+resume: 
 # e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_acc_ckpt.pth
 
 
