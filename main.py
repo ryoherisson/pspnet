@@ -7,6 +7,7 @@ from logging import getLogger
 
 import torch
 import torch.nn as nn
+import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from tensorboardX import SummaryWriter
@@ -73,6 +74,8 @@ def main(args):
 
     network = PSPNet(n_classes=configs['n_classes'], img_size=configs['input_size'], img_size_8=configs['input_size_8'])
     network = network.to(device)
+    criterion = PSPLoss(aux_weight=configs['aux_weight'])
+    optimizer = optim.Adam(network.parameters(), lr=configs['lr'], weight_decay=configs['decay'])
 
     logger.info('model summary: ')
     summary(network, input_size=(configs['n_channels'], configs['input_size'], configs['input_size']))
