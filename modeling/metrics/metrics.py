@@ -17,7 +17,7 @@ pd.set_option('display.unicode.east_asian_width', True)
 class Metrics(object):
     def __init__(self, **cfg):
         self.n_classes = cfg['n_classes']
-        self.classes = cfg['classes']
+        self.classes = ['background'] + cfg['classes'] # 0 is background
         self.img_size = cfg['img_size']
         self.writer = cfg['writer']
         self.metrics_dir = cfg['metrics_dir']
@@ -40,23 +40,28 @@ class Metrics(object):
         self.pred_list.append(pred)
         self.target_list.append(target)
 
-    def calc_metrics(self):
+    def calc_metrics(self, epoch, mode):
 
-        pred = torch.cat([p for p in self.pred_list], axis=0)
-        target = torch.cat([t for t in self.target_list], axis=0)
+        preds = torch.cat([p for p in self.pred_list], axis=0)
+        targets = torch.cat([t for t in self.target_list], axis=0)
 
-        pred = pred.numpy()
-        target = target.numpy()
+        preds = preds.numpy()
+        targets = targets.numpy()
+
+        self.preds = preds
 
         # calc histgram and make confusion matrix
-        cmx = np.bincount(self.n_classes * target.astype(int) 
-                         + pred, minlength=self.n_classes ** 2).reshape(self.n_classes, self.n_classes)
+        cmx = np.bincount(self.n_classes * targets.astype(int) 
+                         + preds, minlength=self.n_classes ** 2).reshape(self.n_classes, self.n_classes)
         
         with np.errstate(invalid='ignore'):
             self.ious = np.diag(cmx) / (cmx.sum(axis=1) + cmx.sum(axis=0) - np.diag(cmx))
         
         self.loss = np.mean(self.loss_list)
-        self.mean_iou = np.nanmean(ious)
+        self.mean_iou = np.nanmean(self.ious)
+
+        self.logging(epoch, mode)
+        self.save_csv(epoch, mode)
 
     def logging(self, epoch, mode):
         logger.info(f'{mode} metrics...')
