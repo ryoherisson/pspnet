@@ -19,6 +19,7 @@ from data_process.data_path_process import make_datapath_list
 from data_process.dataloader import DataTransform, VOCDataset
 from modeling.pspnet.pspnet import PSPNet
 from modeling.criterion.psploss import PSPLoss
+from modeling.metrics.metrics import Metrics
 
 logger = getLogger(__name__)
 
@@ -59,8 +60,8 @@ def main(args):
 
     train_img_list, train_annot_list, test_img_list, test_annot_list = make_datapath_list(rootpath=data_root, train_data=configs['train_txt'], test_data=configs['test_txt'])
     
-    train_transform = DataTransform(input_size=configs['input_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='train')
-    test_transform = DataTransform(input_size=configs['input_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='test')
+    train_transform = DataTransform(img_size=configs['img_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='train')
+    test_transform = DataTransform(img_size=configs['img_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='test')
 
     train_dataset = VOCDataset(train_img_list, train_annot_list, transform=train_transform, label_color_map=configs['label_color_map'])
     test_dataset = VOCDataset(test_img_list, test_annot_list, transform=test_transform, label_color_map=configs['label_color_map'])
@@ -72,7 +73,7 @@ def main(args):
     ### Network ###
     logger.info('preparing network...')
 
-    network = PSPNet(n_classes=configs['n_classes'], img_size=configs['input_size'], img_size_8=configs['input_size_8'])
+    network = PSPNet(n_classes=configs['n_classes'], img_size=configs['img_size'], img_size_8=configs['input_size_8'])
     network = network.to(device)
     criterion = PSPLoss(aux_weight=configs['aux_weight'])
     optimizer = optim.Adam(network.parameters(), lr=configs['lr'], weight_decay=configs['decay'])
@@ -94,10 +95,21 @@ def main(args):
 
 
     logger.info('model summary: ')
-    summary(network, input_size=(configs['n_channels'], configs['input_size'], configs['input_size']))
+    summary(network, input_size=(configs['n_channels'], configs['img_size'], configs['img_size']))
 
-    if configs["n_gpus"] > 1:
+    if configs['n_gpus'] > 1:
         network = nn.DataParallel(network)
+        
+    ### Metrics ###
+    metrics_cfg = {
+        'n_classes': configs['n_classes'],
+        'classes': configs['classes'],
+        'img_size': configs['img_size'],
+        'writer': writer,
+        'metrics_dir': paths.metrics_dir,
+    }
+
+    metrics = Metrics(**metrics_cfg)
 
     ### Visualize Results ###
 
