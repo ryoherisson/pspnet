@@ -77,8 +77,27 @@ def main(args):
     criterion = PSPLoss(aux_weight=configs['aux_weight'])
     optimizer = optim.Adam(network.parameters(), lr=configs['lr'], weight_decay=configs['decay'])
 
+    if configs['resume']:
+        # Load checkpoint
+        logger.info('==> Resuming from checkpoint...\n')
+        if not Path(configs['resume']).exists():
+            logger.info('No checkpoint found !')
+            raise ValueError('No checkpoint found !')
+
+        network.load_state_dict(ckpt['model_state_dict'])
+        optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+        start_epoch = ckpt['epoch']
+        loss = ckpt['loss']
+    else:
+        logger.info('==> Building model...\n')
+        start_epoch = 0 
+
+
     logger.info('model summary: ')
     summary(network, input_size=(configs['n_channels'], configs['input_size'], configs['input_size']))
+
+    if configs["n_gpus"] > 1:
+        network = nn.DataParallel(network)
 
     ### Visualize Results ###
 
