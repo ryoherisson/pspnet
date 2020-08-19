@@ -22,18 +22,18 @@ from data_process.utils.data_augmentation import Compose, Scale, RandomRotation,
 
 
 class DataTransform():
-    def __init__(self, input_size, color_mean, color_std, mode):
+    def __init__(self, img_size, color_mean, color_std, mode):
         if mode == 'train':
             self.data_transform = Compose([
                 Scale(scale=[0.5, 1.5]),
                 RandomRotation(angle=[-10, 10]),
                 RandomMirror(),
-                Resize(input_size),
+                Resize(img_size),
                 Normalize_Tensor(color_mean, color_std)
             ])
         elif mode == 'test':
             self.data_transform = Compose([
-                Resize(input_size),
+                Resize(img_size),
                 Normalize_Tensor(color_mean, color_std)
             ])
 
