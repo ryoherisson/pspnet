@@ -2,7 +2,7 @@
 This is a pytorch implementation of Pyramid Scene Parsing Network in pytorch.  
 
 (Reference)  
-https://github.com/YutaroOgawa/pytorch_advanced/tree/master/2_objectdetection  
+https://github.com/YutaroOgawa/pytorch_advanced/tree/master/3_semantic_segmentation
 
 ## Requirements
 ```bash

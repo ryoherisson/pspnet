@@ -24,6 +24,7 @@ n_gpus: 1 # currently works with only one gpu
 batch_size: 64
 n_epochs: 50
 input_size_8: 60
+aux_weight: 0.4
 
 # pretrained path: vgg16 model path or blank
 pretrained: ./weights/vgg16_reducedfc.pth
