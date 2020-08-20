@@ -3,7 +3,7 @@
 # ----------
 data_root: ./dataset/
 n_classes: 21
-classes: ['aeroplane', 'bicycle', 'bird', 'boat',
+classes:    ['aeroplane', 'bicycle', 'bird', 'boat',
             'bottle', 'bus', 'car', 'cat', 'chair',
             'cow', 'diningtable', 'dog', 'horse',
             'motorbike', 'person', 'pottedplant',
@@ -20,7 +20,7 @@ test_txt: val.txt
 # ----------------
 lr: 0.0001
 decay: 0.0001
-n_gpus: 1 # currently works with only one gpu
+n_gpus: 2 # currently works with only one gpu
 batch_size: 64
 n_epochs: 50
 input_size_8: 60
