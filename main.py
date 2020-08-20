@@ -87,6 +87,7 @@ def main(args):
             logger.info('No checkpoint found !')
             raise ValueError('No checkpoint found !')
 
+        ckpt = torch.load(configs['resume'])
         network.load_state_dict(ckpt['model_state_dict'])
         optimizer.load_state_dict(ckpt['optimizer_state_dict'])
         start_epoch = ckpt['epoch']

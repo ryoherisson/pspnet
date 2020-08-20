@@ -26,29 +26,14 @@ class Metrics(object):
 
     def initialize(self):
         self.cmx = np.zeros((self.n_classes, self.n_classes))
-        self.pred_list = []
-        self.target_list = []
-        self.loss_list = []
 
-    def update(self, preds, targets, loss):
-        
-        self.loss_list.append(loss)
-        
-        pred = preds.view(-1)
-        target = targets.view(-1)
+    def calc_metrics(self, preds, targets, loss, epoch, mode):
 
-        self.pred_list.append(pred)
-        self.target_list.append(target)
-
-    def calc_metrics(self, epoch, mode):
-
-        preds = torch.cat([p for p in self.pred_list], axis=0)
-        targets = torch.cat([t for t in self.target_list], axis=0)
+        preds = preds.view(-1)
+        targets = targets.view(-1)
 
         preds = preds.numpy()
         targets = targets.numpy()
-
-        self.preds = preds
 
         # calc histgram and make confusion matrix
         cmx = np.bincount(self.n_classes * targets.astype(int) 
@@ -57,7 +42,7 @@ class Metrics(object):
         with np.errstate(invalid='ignore'):
             self.ious = np.diag(cmx) / (cmx.sum(axis=1) + cmx.sum(axis=0) - np.diag(cmx))
         
-        self.loss = np.mean(self.loss_list)
+        self.loss = loss
         self.mean_iou = np.nanmean(self.ious)
 
         self.logging(epoch, mode)

@@ -1,7 +1,9 @@
+from pathlib import Path
 from tqdm import tqdm
 
 from logging import getLogger
 from collections import OrderedDict
+from PIL import Image
 
 import torch
 import torch.nn as nn
@@ -34,6 +36,8 @@ class SemanticSegmentation(object):
             self.network.train()
 
             train_loss = 0
+            pred_list = []
+            target_list = []
 
             with tqdm(self.train_loader, ncols=100) as pbar:
                 for idx, (inputs, targets, img_paths_) in enumerate(pbar):
@@ -55,22 +59,22 @@ class SemanticSegmentation(object):
                     preds = torch.softmax(outputs, 1).max(1)[1]
 
                     ### metrics update
-                    self.metrics.update(preds=preds.cpu().detach().clone(),
-                                        targets=targets.cpu().detach().clone(),
-                                        loss=train_loss)
+                    pred_list.append(preds.cpu().detach().clone())
+                    target_list.append(targets.cpu().detach().clone())
 
                     ### logging train loss and accuracy
                     pbar.set_postfix(OrderedDict(
                         epoch="{:>10}".format(epoch),
-                        loss="{:.4f}".format(train_loss)))
+                        loss="{:.4f}".format(train_loss/(idx+1))))
 
             if epoch % self.save_ckpt_interval == 0:
                 logger.info('\nsaving checkpoint...')
                 self._save_ckpt(epoch, train_loss/(idx+1))
 
             logger.info('\ncalculate metrics...')
-            self.metrics.calc_metrics(epoch, mode='train')
-
+            preds = torch.cat([p for p in pred_list], axis=0)
+            targets = torch.cat([t for t in target_list], axis=0)
+            self.metrics.calc_metrics(preds, targets, train_loss/(idx+1), epoch, mode='train')
             self.metrics.initialize()
 
             ### test
@@ -88,6 +92,8 @@ class SemanticSegmentation(object):
 
         test_loss = 0
         img_path_list = []
+        pred_list = []
+        target_list = []
 
         with torch.no_grad():
             with tqdm(self.test_loader, ncols=100) as pbar:
@@ -109,27 +115,27 @@ class SemanticSegmentation(object):
                     preds = torch.softmax(outputs, 1).max(1)[1]
 
                     ### metrics update
-                    self.metrics.update(preds=preds.cpu().detach().clone(),
-                                        targets=targets.cpu().detach().clone(),
-                                        loss=test_loss)
+                    pred_list.append(preds.cpu().detach().clone())
+                    target_list.append(targets.cpu().detach().clone())
 
                     ### logging test loss and accuracy
                     pbar.set_postfix(OrderedDict(
                         epoch="{:>10}".format(epoch),
-                        loss="{:.4f}".format(test_loss)))
+                        loss="{:.4f}".format(test_loss/(idx+1))))
 
             ### metrics
             logger.info('\ncalculate metrics...')
-            self.metrics.calc_metrics(epoch, mode='test') 
+            preds = torch.cat([p for p in pred_list], axis=0)
+            targets = torch.cat([t for t in target_list], axis=0)
+            self.metrics.calc_metrics(preds, targets, test_loss/(idx+1), epoch, mode='test')
             test_mean_iou = self.metrics.mean_iou
-            preds = self.metrics.preds
 
             ### show images on tensorboard
-            # self._show_imgs(img_path_list[:2], preds[:2], self.img_size, epoch, prefix='val')
+            self._show_imgs(img_path_list[:2], targets[:2], preds[:2], epoch, prefix='val')
 
             ### save result images
             if inference:
-                logger.info('\saving images...')
+                logger.info('\nsaving images...')
                 self._save_images(img_path_list, preds)
 
             self.metrics.initialize()
@@ -155,7 +161,7 @@ class SemanticSegmentation(object):
             'loss': loss,
         }, ckpt_path)
 
-    def _show_imgs(self, img_paths, preds, img_size, epoch, prefix='train'):
+    def _show_imgs(self, img_paths, targets, preds, epoch, prefix='train'):
         """Show result image on Tensorboard
 
         Parameters
@@ -163,18 +169,27 @@ class SemanticSegmentation(object):
         img_paths : list
             original image path
         preds : tensor
-            [1, 21, img_size, img_size] ([mini-batch, n_classes, height, width])
-        img_size : int
-            show img size
+            [1, img_size, img_size] ([mini-batch, height, width])
         prefix : str, optional
             'train' or 'test', by default 'train'
         """
 
         for i, img_path in enumerate(img_paths):
-            pred = preds[i][1:]
-            annotated_img = self.vis_img.decode_segmap(img_path, pred, img_size, img_size)
-            annotated_img = transforms.functional.to_tensor(annotated_img)
-            self.writer.add_image(f'{prefix}/results_{i}', annotated_img, epoch)
+            target = targets[i]
+            pred = preds[i]
+
+            orig_img = Image.open(img_path).resize((pred.shape[0], pred.shape[1]))
+            orig_img = transforms.functional.to_tensor(orig_img)
+
+            target_img = self.vis_img.decode_segmap(target)
+            target_img = transforms.functional.to_tensor(target_img)
+
+            pred_img = self.vis_img.decode_segmap(pred)
+            pred_img = transforms.functional.to_tensor(pred_img)
+            
+            self.writer.add_image(f'{prefix}/original_{i}', orig_img, epoch)
+            self.writer.add_image(f'{prefix}/target_{i}', target_img, epoch)
+            self.writer.add_image(f'{prefix}/result_{i}', pred_img, epoch)
 
     def _save_images(self, img_paths, preds):
         """Save Image
@@ -193,5 +208,5 @@ class SemanticSegmentation(object):
 
             annotated_img = self.vis_img.decode_segmap(pred)
 
-            outpath = self.img_outdir / img_path.name
+            outpath = self.img_outdir / Path(img_path).name
             self.vis_img.save_img(annotated_img, outpath)
