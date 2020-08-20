@@ -33,7 +33,7 @@ save_ckpt_interval: 50
 log_dir: ./logs/
 
 # checkpoint path or blank
-resume: /home/rizawa/Codes/playing/ML/PSPNet/logs/2020-08-20T00:44:54.141533/checkpoint/best_iou_ckpt.pth
+resume: 
 # e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_acc_ckpt.pth
 
 
