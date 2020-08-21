@@ -14,6 +14,8 @@ color_mean: [0.485, 0.456, 0.406]
 color_std: [0.229, 0.224, 0.225]
 train_txt: train.txt
 test_txt: val.txt
+img_extension: .jpg
+anno_extension: .png
 
 # ----------------
 # train parameters
@@ -34,7 +36,7 @@ log_dir: ./logs/
 
 # checkpoint path or blank
 resume: 
-# e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_acc_ckpt.pth
+# e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_iou_ckpt.pth
 
 
 # ----------------

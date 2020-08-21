@@ -208,5 +208,10 @@ class SemanticSegmentation(object):
 
             annotated_img = self.vis_img.decode_segmap(pred)
 
+            width = Image.open(img_paths).size[0]
+            height = Image.open(img_paths).size[1]
+
+            annotated_img = annotated_img.resize((width, height), Image.NEAREST)
+
             outpath = self.img_outdir / Path(img_path).name
             self.vis_img.save_img(annotated_img, outpath)
