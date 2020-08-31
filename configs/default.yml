@@ -22,8 +22,8 @@ anno_extension: .png
 # ----------------
 lr: 0.0001
 decay: 0.0001
-n_gpus: 2 # currently works with only one gpu
-batch_size: 64
+n_gpus: 1
+batch_size: 16
 n_epochs: 50
 input_size_8: 60
 aux_weight: 0.4
@@ -35,7 +35,7 @@ save_ckpt_interval: 50
 log_dir: ./logs/
 
 # checkpoint path or blank
-resume: 
+resume:
 # e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_iou_ckpt.pth
 
 

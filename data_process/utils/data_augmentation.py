@@ -20,8 +20,8 @@ class Compose(object):
         return img, anno_class_img
 
 
-class Scale(object):
-    def __init__(self, scale):
+class RandomScale(object):
+    def __init__(self, scale=(0.5, 1.5)):
         self.scale = scale
 
     def __call__(self, img, anno_class_img):
@@ -35,12 +35,11 @@ class Scale(object):
         scaled_w = int(width * scale)  # img.size=[width][height]
         scaled_h = int(height * scale)  # img.size=[width][height]
 
-        # resize
+        # img resize
         img = img.resize((scaled_w, scaled_h), Image.BICUBIC)
 
-        # annot resize
-        anno_class_img = anno_class_img.resize(
-            (scaled_w, scaled_h), Image.NEAREST)
+        # anno resize
+        anno_class_img = anno_class_img.resize((scaled_w, scaled_h), Image.NEAREST)
 
         # rescale to the original size
         # find the position of the cutout
@@ -48,17 +47,14 @@ class Scale(object):
             left = scaled_w - width
             left = int(np.random.uniform(0, left))
 
-            top = scaled_h-height
+            top = scaled_h - height
             top = int(np.random.uniform(0, top))
 
             img = img.crop((left, top, left+width, top+height))
-            anno_class_img = anno_class_img.crop(
-                (left, top, left+width, top+height))
+            anno_class_img = anno_class_img.crop((left, top, left+width, top+height))
 
         else:
             # padding if the size is smaller than input size
-            p_palette = anno_class_img.copy().getpalette()
-
             img_original = img.copy()
             anno_class_img_original = anno_class_img.copy()
 
@@ -68,15 +64,11 @@ class Scale(object):
             pad_height = height-scaled_h
             pad_height_top = int(np.random.uniform(0, pad_height))
 
-            img = Image.new(img.mode, (width, height), (0, 0, 0))
+            img = Image.new(img.mode, (width, height), (255, 0, 0))
             img.paste(img_original, (pad_width_left, pad_height_top))
 
-            anno_class_img = Image.new(
-                anno_class_img.mode, (width, height), (0))
-            anno_class_img.paste(anno_class_img_original,
-                                 (pad_width_left, pad_height_top))
-
-            anno_class_img.putpalette(p_palette)
+            anno_class_img = Image.new(anno_class_img.mode, (width, height), (0))
+            anno_class_img.paste(anno_class_img_original, (pad_width_left, pad_height_top))
 
         return img, anno_class_img
 

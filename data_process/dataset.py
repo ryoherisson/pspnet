@@ -18,14 +18,14 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
-from data_process.utils.data_augmentation import Compose, Scale, RandomRotation, RandomMirror, Resize, Normalize_Tensor
+from data_process.utils.data_augmentation import Compose, RandomScale, RandomRotation, RandomMirror, Resize, Normalize_Tensor
 
 
 class DataTransform():
     def __init__(self, img_size, color_mean, color_std, mode):
         if mode == 'train':
             self.data_transform = Compose([
-                Scale(scale=[0.5, 1.5]),
+                RandomScale(scale=[0.5, 1.5]),
                 RandomRotation(angle=[-10, 10]),
                 RandomMirror(),
                 Resize(img_size),
@@ -61,9 +61,8 @@ class VOCDataset(data.Dataset):
         img = Image.open(img_filepath)
 
         anno_filepath = self.anno_list[index]
-        anno = Image.open(anno_filepath)
-        # anno = Image.fromarray(self.encode_segmap(np.array(anno)))
-
+        anno = Image.open(anno_filepath).convert("RGB")
+        anno = Image.fromarray(self.encode_segmap(np.array(anno)))
         img, anno = self.transform(img, anno)
 
         return img, anno, img_filepath

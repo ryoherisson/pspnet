@@ -5,6 +5,8 @@ from datetime import datetime
 
 from logging import getLogger
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -93,6 +95,7 @@ def main(args):
         optimizer.load_state_dict(ckpt['optimizer_state_dict'])
         start_epoch = ckpt['epoch']
         loss = ckpt['loss']
+        start_epoch = 0 
     else:
         logger.info('==> Building model...\n')
         start_epoch = 0 
@@ -146,5 +149,12 @@ def main(args):
         semantic_segmentaion.train(n_epochs=configs['n_epochs'], start_epoch=start_epoch)
 
 if __name__ == "__main__":
+    seed = 2
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+
     args = parser()
     main(args)
