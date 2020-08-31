@@ -2,7 +2,7 @@
 This is a pytorch implementation of Pyramid Scene Parsing Network in pytorch.  
 
 (Reference)  
-https://github.com/YutaroOgawa/pytorch_advanced/tree/master/2_objectdetection  
+https://github.com/YutaroOgawa/pytorch_advanced/tree/master/3_semantic_segmentation
 
 ## Requirements
 ```bash
@@ -18,28 +18,30 @@ Create a configuration file based on configs/default.yaml.
 # ----------
 data_root: ./dataset/
 n_classes: 21
-classes: ['aeroplane', 'bicycle', 'bird', 'boat',
-          'bottle', 'bus', 'car', 'cat', 'chair',
-          'cow', 'diningtable', 'dog', 'horse',
-          'motorbike', 'person', 'pottedplant',
-          'sheep', 'sofa', 'train', 'tvmonitor']
-img_size: 300
+classes:    ['aeroplane', 'bicycle', 'bird', 'boat',
+            'bottle', 'bus', 'car', 'cat', 'chair',
+            'cow', 'diningtable', 'dog', 'horse',
+            'motorbike', 'person', 'pottedplant',
+            'sheep', 'sofa', 'train', 'tvmonitor']
+img_size: 475
 n_channels: 3
-color_mean: [104, 117, 123]
+color_mean: [0.485, 0.456, 0.406]
+color_std: [0.229, 0.224, 0.225]
 train_txt: train.txt
 test_txt: val.txt
+img_extension: .jpg
+anno_extension: .png
 
 # ----------------
 # train parameters
 # ----------------
 lr: 0.0001
-decay: 1e-4
-n_gpus: 1
+decay: 0.0001
+n_gpus: 2 # currently works with only one gpu
 batch_size: 64
 n_epochs: 50
-
-# pretrained path: vgg16 model path or blank
-pretrained: ./weights/vgg16_reducedfc.pth
+input_size_8: 60
+aux_weight: 0.4
 
 # save_ckpt_interval should not be 0.
 save_ckpt_interval: 50
@@ -48,19 +50,40 @@ save_ckpt_interval: 50
 log_dir: ./logs/
 
 # checkpoint path or blank
-resume: ./weights/ssd300_mAP_77.43_v2.pth
-# e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_acc_ckpt.pth
+resume: 
+# e.g) resume: ./logs/2020-07-26T00:19:34.918002/ckpt/best_iou_ckpt.pth
 
+# ----------------
+# Visualize Results
+# ----------------
 # visualize label color_map
-label_color_map: ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231', '#911eb4', '#46f0f0', '#f032e6',
-                   '#d2f53c', '#fabebe', '#008080', '#000080', '#aa6e28', '#fffac8', '#800000', '#aaffc3', '#808000',
-                   '#ffd8b1', '#e6beff', '#808080', '#FFFFFF']
-# font should be downloaded manually
-font_path: ./font/calibril.ttf
+label_color_map: [
+                [0, 0, 0],
+                [128, 0, 0],
+                [0, 128, 0],
+                [128, 128, 0],
+                [0, 0, 128],
+                [128, 0, 128],
+                [0, 128, 128],
+                [128, 128, 128],
+                [64, 0, 0],
+                [192, 0, 0],
+                [64, 128, 0],
+                [192, 128, 0],
+                [64, 0, 128],
+                [192, 0, 128],
+                [64, 128, 128],
+                [192, 128, 128],
+                [0, 64, 0],
+                [128, 64, 0],
+                [0, 192, 0],
+                [128, 192, 0],
+                [0, 64, 128],
+                ]
 ```
 
 ### Prepare Dataset
-If you want to use your own dataset, you need to prepare a directory with the following structure:
+Prepare a directory with the following structure:
 ```bash
 datasets/
 ├── annotations
@@ -73,8 +96,8 @@ datasets/
 │   ├── fuga.jpg
 │   ├── foo.jpg
 │   └── bar.jpg
-├── train.csv
-└── test.csv
+├── train.txt
+└── test.txt
 ```
 
 The content of the txt file should have the following structure.
@@ -124,8 +147,7 @@ logs/
 inference_logs/
 └── 2020-07-26T14:21:06.197407
     ├── images
-    │   ├── hoge.jpg
-    │   └── fuga.csv 
+    │   └── hoge.jpg 
     ├── metrics
     │   └── test_metrics.csv 
     ├── tensorboard

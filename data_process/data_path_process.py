@@ -1,11 +1,11 @@
 """Dataset process
 Original author: YutaroOgawa
-https://github.com/YutaroOgawa/pytorch_advanced/blob/master/2_objectdetection/utils/ssd_model.py
+https://github.com/YutaroOgawa/pytorch_advanced/blob/master/3_semantic_segmentation/utils/dataloader.py
 """
 
 from pathlib import Path
 
-def make_datapath_list(rootpath, train_data='train.txt', test_data='test.txt', extension='.jpg'):
+def make_datapath_list(rootpath, train_data='train.txt', test_data='test.txt', img_extension='.jpg', anno_extension='.png'):
     """
     Create list of image and annotation data path
 
@@ -13,12 +13,14 @@ def make_datapath_list(rootpath, train_data='train.txt', test_data='test.txt', e
     ----------
     rootpath : str
         path to the data directory
-    train_data : 
+    train_data : str
         text file with train filename
-    test_data : 
+    test_data : str
         text file with test filename
-    extension :
+    img_extension : str
         extension of image
+    anno_extension : str
+        extension of annotation
     Returns
     ----------
     ret : train_img_list, train_anno_list, val_img_list, val_anno_list
@@ -36,9 +38,10 @@ def make_datapath_list(rootpath, train_data='train.txt', test_data='test.txt', e
 
     for line in open(train_filenames):
         line = line.rstrip('\n')
-        img_fname = line + extension
+        img_fname = line + img_extension
         img_path = img_dir / img_fname
-        annot_path = annot_dir / img_fname
+        anno_fname = line + anno_extension
+        annot_path = annot_dir / anno_fname
         train_img_list.append(str(img_path))
         train_annot_list.append(str(annot_path))
 
@@ -48,9 +51,10 @@ def make_datapath_list(rootpath, train_data='train.txt', test_data='test.txt', e
 
     for line in open(test_filenames):
         line = line.rstrip('\n')
-        img_fname = line + extension
+        img_fname = line + img_extension
         img_path = img_dir / img_fname
-        annot_path = annot_dir / img_fname
+        anno_fname = line + anno_extension
+        annot_path = annot_dir / anno_fname
         test_img_list.append(str(img_path))
         test_annot_list.append(str(annot_path))
 
