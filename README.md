@@ -83,7 +83,7 @@ label_color_map: [
 ```
 
 ### Prepare Dataset
-If you want to use your own dataset, you need to prepare a directory with the following structure:
+Prepare a directory with the following structure:
 ```bash
 datasets/
 ├── annotations
