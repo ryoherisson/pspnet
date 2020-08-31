@@ -5,6 +5,8 @@ from datetime import datetime
 
 from logging import getLogger
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -17,7 +19,7 @@ from utils.path_process import Paths
 from utils.setup_logger import setup_logger
 from utils.vis_img import VisImage
 from data_process.data_path_process import make_datapath_list
-from data_process.dataloader import DataTransform, VOCDataset
+from data_process.dataset import DataTransform, VOCDataset
 from modeling.semseg import SemanticSegmentation
 from modeling.pspnet.pspnet import PSPNet
 from modeling.criterion.psploss import PSPLoss
@@ -60,7 +62,8 @@ def main(args):
     data_root = configs['data_root']
     logger.info(f'==> dataset path: {data_root}\n')
 
-    train_img_list, train_annot_list, test_img_list, test_annot_list = make_datapath_list(rootpath=data_root, train_data=configs['train_txt'], test_data=configs['test_txt'])
+    train_img_list, train_annot_list, test_img_list, test_annot_list = make_datapath_list(rootpath=data_root, train_data=configs['train_txt'], test_data=configs['test_txt'],
+        img_extension=configs['img_extension'], anno_extension=configs['anno_extension'])
     
     train_transform = DataTransform(img_size=configs['img_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='train')
     test_transform = DataTransform(img_size=configs['img_size'], color_mean=configs['color_mean'], color_std=configs['color_std'], mode='test')
@@ -92,6 +95,7 @@ def main(args):
         optimizer.load_state_dict(ckpt['optimizer_state_dict'])
         start_epoch = ckpt['epoch']
         loss = ckpt['loss']
+        start_epoch = 0 
     else:
         logger.info('==> Building model...\n')
         start_epoch = 0 
@@ -145,5 +149,12 @@ def main(args):
         semantic_segmentaion.train(n_epochs=configs['n_epochs'], start_epoch=start_epoch)
 
 if __name__ == "__main__":
+    seed = 2
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+
     args = parser()
     main(args)
