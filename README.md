@@ -1,5 +1,5 @@
 # PSPNet: Pyramid Scene Parsing Network in pytorch
-This is a pytorch implementation of Pyramid Scene Parsing Network in pytorch.  
+This is a pytorch implementation of Pyramid Scene Parsing Network.  
 
 (Reference)  
 https://github.com/YutaroOgawa/pytorch_advanced/tree/master/3_semantic_segmentation
